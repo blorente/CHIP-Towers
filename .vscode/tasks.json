@@ -170,12 +170,12 @@
 
 {
     "version": "0.1.0",    
-    "windows": { "command" : "make"},
+    "windows": { "command" : "cmake --build ${workspaceRoot}\\buildMinGW\\"},
     "linux": { "command": "make"},
     "isShellCommand": true,
     "tasks": [
         {
-            "taskName": "Makefile",
+            "taskName": "Build",
             // Make this the default build command.
             "isBuildCommand": true,
             // Show the output window only if unrecognized errors occur.

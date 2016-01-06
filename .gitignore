@@ -1,1 +1,8 @@
 *.exe
+*.vcxproj
+*.vcxproj.*
+*.sln
+*.bin
+*.obj
+*.o
+build*/*
