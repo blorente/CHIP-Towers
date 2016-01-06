@@ -1,8 +1,8 @@
 #include <iostream>
-#include "../emulator/Emulator.hpp"
+#include "Emulator.hpp"
 
 #define CATCH_CONFIG_MAIN
-#include "../include/catch.hpp"
+#include "catch.hpp"
 
 TEST_CASE( "Test Framework Working", "[Dumb]" ) {
     REQUIRE( 1 == 1 );
