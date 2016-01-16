@@ -22,7 +22,7 @@ public:
 		
 	~Emulator(){}
 	
-public: //protected:
+public: //private:
 	
 	typedef struct {
 		unsigned char sp;
