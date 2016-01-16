@@ -1,8 +1,12 @@
+#ifndef ALL_TESTS_
+#define ALL_TESTS_
+
 #include <iostream>
 #include "Emulator.hpp"
 
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
+
 
 TEST_CASE( "Test Framework Working", "[Dumb]" ) {
     REQUIRE( 1 == 1 );
@@ -37,4 +41,4 @@ TEST_CASE ("Emulator empty constructor working", "[Emulator]") {
 	}
 }
 
-
+#endif
