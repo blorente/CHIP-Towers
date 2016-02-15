@@ -104,7 +104,24 @@ TEST_CASE ("Fontset load working", "[Emulator]") {
 } 
 
 TEST_CASE("Load ROM working", "[Emulator]") {
+        
+     Emulator e = Emulator();
+     e.reboot();
+     e.loadROM("../../emulator/res/games/15PUZZLE");
+     
+    char buf[e.memory.size() - 512];     
+        
+    std::ifstream rom_file("../../emulator/res/games/15PUZZLE", std::ios::binary | std::ios::in);
+    if (rom_file.is_open()) {
+        rom_file.read(buf, e.memory.size() - 512);  
+        rom_file.close();
+    } else {
+        std::cout << "File not loaded properly" << std::endl;
+    }
     
+    for (int i = 0; i < e.memory.size() - 512; i++){
+        REQUIRE((char)e.memory[i + 512] == buf[i]);
+    }
   
 }
 

@@ -29,8 +29,22 @@ public:
     }
     
 	void loadROM(std::string filename) {
-        std::cout << filename << std::endl;       
+        std::cout << filename << std::endl;
+        char buf[memory.size() - 512];     
         
+        std::ifstream rom_file(filename, std::ios::binary | std::ios::in);
+        if (rom_file.is_open()) {
+            rom_file.read(buf, (memory.size() - 512));
+            
+            for (int i = 0; i < memory.size() - 512; i++){
+                std::cout << "Hi: " << buf[i] << std::endl;
+                memory[i + 512] = buf[i];
+            }
+            
+            rom_file.close();
+        } else {
+            std::cout << "File not loaded properly" << std::endl;
+        }
     }
     
 	void Run() {
