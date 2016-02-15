@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 class Emulator {
 public:
@@ -28,7 +29,8 @@ public:
     }
     
 	void loadROM(std::string filename) {
-        std::cout << filename << std::endl;
+        std::cout << filename << std::endl;       
+        
     }
     
 	void Run() {
@@ -36,7 +38,11 @@ public:
         char q;
         do {
             std::cin >> q;
-            std::cin.get();
+            std::cin.get();     
+            std::cout << "Cycle:" << cycle++;
+            
+            emulateCycle();
+            
         } while (q != 'q');
     }
 	
@@ -60,6 +66,22 @@ private:
 			memory[i] = chip8fontset[i];			
 		}
 	}
+    
+    void emulateCycle() {
+        //Fetch
+        instruction = memory[pc] << 8 | memory[pc + 1]; // 1 instr = 2 bytes = 2 memory locations
+        pc += 2;
+        
+        //Decode
+        switch (instruction & 0xF000) {
+            //Execute
+            
+            
+            default:
+                std::cout << " Unknown Instruction: " << instruction << std::endl;
+                break;            
+        } 
+    }
 		
 /* Fields */
 public: //protected:
@@ -76,7 +98,7 @@ public: //protected:
 
 public: //private:
 	
-	unsigned char opcode;
+	unsigned char instruction;
 	
 	std::vector<unsigned char> memory; //Memory allocation
 	unsigned short pc; //Program counter (16 bit)
@@ -105,6 +127,9 @@ public: //private:
 	0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
 	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 	};
+
+/* opcodes */
+private:
 	
 };
 

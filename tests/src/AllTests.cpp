@@ -2,6 +2,7 @@
 #define ALLTESTS
 
 #include <iostream>
+#include <fstream>
 #include "Emulator.hpp"
 
 #define CATCH_CONFIG_MAIN
@@ -13,32 +14,6 @@ TEST_CASE( "Test Framework Working", "[Dumb]" ) {
     REQUIRE( 1 - 7 != 6 );
 }
 
-TEST_CASE ("Emulator empty constructor working", "[Emulator]") {
-	Emulator* e = new Emulator();
-	// Test memory initialization
-	for (int i = 0; i < 4096; i++) {
-		REQUIRE(e->memory[i] == 0);
-	}
-	// Test pc and I
-	REQUIRE(e->pc == 0);
-	REQUIRE(e->I == 0);
-	// Test register bank
-	for (int i = 0; i < 16; i++) {
-		REQUIRE(e->V[i] == 0);
-	}
-	// Test stack
-	REQUIRE(e->stack.sp == 0);
-	for (int i = 0; i < 16; i++) {
-		REQUIRE(e->stack.stack[i] == 0);
-	}
-	// Test timers
-	REQUIRE(e->timers.d == 0);
-	REQUIRE(e->timers.s == 0);
-	// Test screen buffer
-	for (int i = 0; i < (64 * 32); i++) {
-		REQUIRE(e->scrbuf[i] == 0);
-	}
-}
 
 TEST_CASE ("Emulator reboot working", "[Emulator]") {
     Emulator* e = new Emulator();
@@ -127,5 +102,10 @@ TEST_CASE ("Fontset load working", "[Emulator]") {
 		REQUIRE(e->memory[i] == chip8fontset[i]);
 	}
 } 
+
+TEST_CASE("Load ROM working", "[Emulator]") {
+    
+  
+}
 
 #endif
