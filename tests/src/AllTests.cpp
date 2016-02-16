@@ -171,4 +171,76 @@ TEST_CASE("Simple SE working", "[Emulator]") {
     
 }
 
+TEST_CASE("Simple SNE working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x30;
+    e.memory[e.pc] = 0x42;
+    e.memory[e.pc + 1] = 0x40;
+    e.emulateCycle();
+   
+    REQUIRE(e.pc == 0x0204);
+    
+}
+
+TEST_CASE("Simple SE VV working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x30;
+    e.V[4] = 0x30;
+    e.memory[e.pc] = 0x52;
+    e.memory[e.pc + 1] = 0x40;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == e.V[4]);
+    REQUIRE(e.pc == 0x0204);
+    
+}
+
+TEST_CASE("Simple LD working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x30;
+    e.memory[e.pc] = 0x62;
+    e.memory[e.pc + 1] = 0x05;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0x05);
+    REQUIRE(e.pc == 0x0202);
+    
+}
+
+TEST_CASE("Simple ADD working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x30;
+    e.memory[e.pc] = 0x72;
+    e.memory[e.pc + 1] = 0x05;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0x35);
+    REQUIRE(e.pc == 0x0202);
+    
+}
+
+TEST_CASE("Simple 8LD working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x30;
+    e.V[0] = 0X35;
+    e.memory[e.pc] = 0x82;
+    e.memory[e.pc + 1] = 0x00;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0x35);
+    REQUIRE(e.pc == 0x0202);
+    
+}
+
 #endif

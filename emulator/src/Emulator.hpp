@@ -86,9 +86,11 @@ public: //private:
     
     void setupInstructionSet() {
         
-        instruction_set = std::vector<instruction_t>(36, {"unimplemented", [&] (){printInstruction("unimplemented", instruction);}});
+        instruction_set_base = std::vector<instruction_t>(36, {"unimplemented", [&] (){printInstruction("unimplemented", instruction);}});
+        instruction_set_8x = std::vector<instruction_t>(36, {"unimplemented", [&] (){printInstruction("unimplemented", instruction);}});
         
-        instruction_set[0] = {"zero", [&] () {
+        
+        instruction_set_base[0] = {"zero", [&] () {
                                         if (instruction & 0x000F > 0) {
                                             printInstruction("RET", instruction);
                                         } else {
@@ -96,15 +98,28 @@ public: //private:
                                         }
                                   }
                              };
-        instruction_set[0x1] = {"0x1nnn: JP addr", [&] (){printInstruction("0x1nnn: JP addr", instruction); pc = instruction & 0x0FFF;}};
-        instruction_set[0x2] = {"0x2nnn: CALL addr", [&] (){printInstruction("0x2nnn: CALL addr", instruction); 
+        instruction_set_base[0x1] = {"0x1nnn: JP addr", [&] (){printInstruction("0x1nnn: JP addr", instruction); pc = instruction & 0x0FFF;}};
+        instruction_set_base[0x2] = {"0x2nnn: CALL addr", [&] (){printInstruction("0x2nnn: CALL addr", instruction); 
                                                             stack.stack[stack.sp] = pc; 
                                                             stack.sp++;
                                                             pc = instruction & 0x0FFF;}};
-        instruction_set[0x3] = {"0x3xkk: SE Vx, byte", [&] () {printInstruction("0x3xkk: SE Vx, kk", instruction); 
+        instruction_set_base[0x3] = {"0x3xkk: SE Vx, kk", [&] () {printInstruction("0x3xkk: SE Vx, kk", instruction); 
                                                              if (V[(instruction & 0x0F00) >> 8] == (unsigned char) instruction & 0x00FF) {pc += 2;}}};
+        instruction_set_base[0x4] = {"0x4xkk: SNE Vx, kk", [&] () {printInstruction("0x4xkk: SNE Vx, kk", instruction); 
+                                                             if (V[(instruction & 0x0F00) >> 8] != (unsigned char) instruction & 0x00FF) {pc += 2;}}};
+        instruction_set_base[0x5] = {"0x5xy0: SE Vx, Vy", [&] () {printInstruction("0x5xy0: SE Vx, Vy", instruction); 
+                                                             if (V[(instruction & 0x0F00) >> 8] == V[(instruction & 0x00F0) >> 4]) {pc += 2;}}};
+        instruction_set_base[0x6] = {"0x6xkk: LD Vx, kk", [&] () {printInstruction("0x6xkk: LD Vx, kk", instruction); 
+                                                             V[(instruction & 0x0F00) >> 8] = (unsigned char)(instruction & 0x00FF);}};
+        instruction_set_base[0x7] = {"0x7xkk: LD Vx, kk", [&] () {printInstruction("0x7xkk: LD Vx, kk", instruction); 
+                                                            V[(instruction & 0x0F00) >> 8] += (unsigned char)(instruction & 0x00FF);}};
+                                                            
+        instruction_set_base[0x8] = {"", [&] () {printInstruction(instruction_set_8x[instruction & 0x000F].dissasembly, instruction);
+                                                 instruction_set_8x[instruction & 0x000F].function();}};
+                                                 
+        instruction_set_8x[0x0] = {"8xy0: LD Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x00F0) >> 4];}};
               
-        
+            
     }
     
     void emulateCycle() {
@@ -112,7 +127,7 @@ public: //private:
         instruction = ((memory[pc] << 8) | memory[pc + 1]); // 1 instr = 2 bytes = 2 memory locations 
         pc += 2;
         //Decode & Execute
-        instruction_set[(instruction & 0xF000) >> 12].function();
+        instruction_set_base[(instruction & 0xF000) >> 12].function();
                
         
         
@@ -152,7 +167,8 @@ public: //private:
 	timers_t timers;
 	std::vector<unsigned char> scrbuf; // Monochrome display buffer	
     
-    std::vector<instruction_t> instruction_set;
+    std::vector<instruction_t> instruction_set_base;
+    std::vector<instruction_t> instruction_set_8x;
     
 	const unsigned char chip8fontset[80] =
 	{ 
