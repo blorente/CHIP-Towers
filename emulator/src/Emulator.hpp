@@ -2,6 +2,7 @@
 #define EMULATORH
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <fstream>
 
@@ -34,13 +35,11 @@ public:
         
         std::ifstream rom_file(filename, std::ios::binary | std::ios::in);
         if (rom_file.is_open()) {
-            rom_file.read(buf, (memory.size() - 512));
-            
-            for (int i = 0; i < memory.size() - 512; i++){
-                std::cout << "Hi: " << buf[i] << std::endl;
-                memory[i + 512] = buf[i];
+            int i = 0;
+            while(!rom_file.eof()) {
+                memory[i + 512] = rom_file.get();
+                i++;
             }
-            
             rom_file.close();
         } else {
             std::cout << "File not loaded properly" << std::endl;
@@ -53,7 +52,7 @@ public:
         do {
             std::cin >> q;
             std::cin.get();     
-            std::cout << "Cycle:" << cycle++;
+            std::cout << "Cycle:" << std::dec << cycle++;
             
             emulateCycle();
             
@@ -90,9 +89,8 @@ private:
         switch (instruction & 0xF000) {
             //Execute
             
-            
             default:
-                std::cout << " Unknown Instruction: " << instruction << std::endl;
+                std::cout << " Unknown Instruction: " << std::hex << instruction << std::endl;
                 break;            
         } 
     }
@@ -112,7 +110,7 @@ public: //protected:
 
 public: //private:
 	
-	unsigned char instruction;
+	int instruction;
 	
 	std::vector<unsigned char> memory; //Memory allocation
 	unsigned short pc; //Program counter (16 bit)

@@ -107,20 +107,23 @@ TEST_CASE("Load ROM working", "[Emulator]") {
         
      Emulator e = Emulator();
      e.reboot();
-     e.loadROM("../../emulator/res/games/15PUZZLE");
+     e.loadROM("15PUZZLE");
      
-    char buf[e.memory.size() - 512];     
+    std::vector<unsigned char> buf;     
         
-    std::ifstream rom_file("../../emulator/res/games/15PUZZLE", std::ios::binary | std::ios::in);
+    std::ifstream rom_file("15PUZZLE", std::ios::binary | std::ios::in);
     if (rom_file.is_open()) {
-        rom_file.read(buf, e.memory.size() - 512);  
+        while(!rom_file.eof()) {
+            buf.push_back((unsigned char)rom_file.get());
+        }
         rom_file.close();
     } else {
         std::cout << "File not loaded properly" << std::endl;
     }
     
-    for (int i = 0; i < e.memory.size() - 512; i++){
-        REQUIRE((char)e.memory[i + 512] == buf[i]);
+    for (int i = 0; i < buf.size(); i++){
+        std::cout << std::dec << buf[i] << ' ' ;
+       REQUIRE(e.memory[i + 512] == buf[i]);
     }
   
 }
