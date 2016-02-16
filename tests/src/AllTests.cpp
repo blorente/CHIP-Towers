@@ -130,18 +130,44 @@ TEST_CASE("Load ROM working", "[Emulator]") {
   
 }
 
-TEST_CASE("JMP working", "[Emulator]") {
+TEST_CASE("Simple JMP working", "[Emulator]") {
     
     Emulator e = Emulator();
     e.reboot();
     
     e.memory[e.pc] = 0x12;
     e.memory[e.pc+1] = 0x20;
-    unsigned short ins = (unsigned short)((e.memory[e.pc] << 8) | e.memory[e.pc + 1]);
-    e.instruction = ins;
-    e.instruction_set[(e.instruction & 0xF000) >> 12].function();
+    e.emulateCycle();
     
     REQUIRE(e.pc == 0x220);
+    
+}
+
+TEST_CASE("Simple CALL working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.memory[e.pc] = 0x22;
+    e.memory[e.pc + 1] = 0x40;
+    e.emulateCycle();
+    
+    REQUIRE(e.stack.sp == 1);
+    REQUIRE(e.stack.stack[0] == 0x0202);
+    REQUIRE(e.pc == 0x0240);
+}
+
+TEST_CASE("Simple SE working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x40;
+    e.memory[e.pc] = 0x32;
+    e.memory[e.pc + 1] = 0x40;
+    e.emulateCycle();
+   
+    REQUIRE(e.pc == 0x0204);
     
 }
 

@@ -15,7 +15,7 @@ public:
 		memory = std::vector<unsigned char>(4096);
 		V = std::vector<unsigned char>(16);	
 		scrbuf = std::vector<unsigned char>(64 * 32);	
-		stack.stack = std::vector<unsigned char>(16);
+		stack.stack = std::vector<unsigned short>(16);
 		stack.sp = 0;
 		timers.d = 0;
 		timers.s = 0;
@@ -96,22 +96,30 @@ public: //private:
                                         }
                                   }
                              };
-        instruction_set[1] = {"0x1nnn: JP addr", [&] (){printInstruction("0x1nnn: JP addr", instruction); pc = instruction & 0x0FFF;}};
+        instruction_set[0x1] = {"0x1nnn: JP addr", [&] (){printInstruction("0x1nnn: JP addr", instruction); pc = instruction & 0x0FFF;}};
+        instruction_set[0x2] = {"0x2nnn: CALL addr", [&] (){printInstruction("0x2nnn: CALL addr", instruction); 
+                                                            stack.stack[stack.sp] = pc; 
+                                                            stack.sp++;
+                                                            pc = instruction & 0x0FFF;}};
+        instruction_set[0x3] = {"0x3xkk: SE Vx, byte", [&] () {printInstruction("0x3xkk: SE Vx, kk", instruction); 
+                                                             if (V[(instruction & 0x0F00) >> 8] == (unsigned char) instruction & 0x00FF) {pc += 2;}}};
+              
         
     }
     
     void emulateCycle() {
         //Fetch
         instruction = ((memory[pc] << 8) | memory[pc + 1]); // 1 instr = 2 bytes = 2 memory locations 
+        pc += 2;
         //Decode & Execute
         instruction_set[(instruction & 0xF000) >> 12].function();
+               
         
-        pc += 2;
         
     }
     
     void printInstruction(std::string descr, unsigned short hexvalue) {
-        std::cout << descr << " -> 0x" << std::hex << hexvalue << " memory[" << (short)memory[pc] << "|" << (short)memory[pc+1] << "]";
+        std::cout << descr << " -> 0x" << std::hex << hexvalue << " memory[" << (short)memory[pc-2] << "|" << (short)memory[pc-1] << "]" << std::endl;
     }
 		
 /* Fields */
@@ -119,7 +127,7 @@ public: //protected:
 	
 	typedef struct {
 		unsigned char sp;
-		std::vector<unsigned char>stack;
+		std::vector<unsigned short>stack;
 	} stack_t;
 
 	typedef struct {
