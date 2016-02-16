@@ -71,7 +71,7 @@ TEST_CASE ("Emulator reboot working", "[Emulator]") {
 		REQUIRE(e->scrbuf[i] == 0);
 	}
 }
-
+/*
 TEST_CASE ("Fontset load working", "[Emulator]") {	
 	
 	unsigned char chip8fontset[80] =
@@ -101,7 +101,7 @@ TEST_CASE ("Fontset load working", "[Emulator]") {
 	for (int i = 0; i < 80; i++) {
 		REQUIRE(e->memory[i] == chip8fontset[i]);
 	}
-} 
+} */
 
 TEST_CASE("Load ROM working", "[Emulator]") {
         
@@ -122,10 +122,27 @@ TEST_CASE("Load ROM working", "[Emulator]") {
     }
     
     for (int i = 0; i < buf.size(); i++){
-        std::cout << std::dec << buf[i] << ' ' ;
+       std::cout << std::dec << (short)buf[i] << ' ' ;
        REQUIRE(e.memory[i + 512] == buf[i]);
     }
+    
+    std::cout << std::endl;
   
+}
+
+TEST_CASE("JMP working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.memory[e.pc] = 0x12;
+    e.memory[e.pc+1] = 0x20;
+    unsigned short ins = (unsigned short)((e.memory[e.pc] << 8) | e.memory[e.pc + 1]);
+    e.instruction = ins;
+    e.instruction_set[(e.instruction & 0xF000) >> 12].function();
+    
+    REQUIRE(e.pc == 0x220);
+    
 }
 
 #endif

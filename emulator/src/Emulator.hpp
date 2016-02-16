@@ -3,8 +3,10 @@
 
 #include <iostream>
 #include <iomanip>
+#include <string>
 #include <vector>
 #include <fstream>
+#include <functional>
 
 class Emulator {
 public:
@@ -17,6 +19,8 @@ public:
 		stack.sp = 0;
 		timers.d = 0;
 		timers.s = 0;
+        
+        setupInstructionSet();
 	}
 		
 	~Emulator(){}
@@ -52,14 +56,14 @@ public:
         do {
             std::cin >> q;
             std::cin.get();     
-            std::cout << "Cycle:" << std::dec << cycle++;
+            std::cout << "Cycle: " << std::dec << cycle++ << " | ";
             
             emulateCycle();
             
         } while (q != 'q');
     }
 	
-private:    
+public: //private:    
 
     void initComponents() {       
         memory.assign(memory.size(), 0x0);     
@@ -80,19 +84,34 @@ private:
 		}
 	}
     
+    void setupInstructionSet() {
+        
+        instruction_set = std::vector<instruction_t>(36, {"unimplemented", [&] (){printInstruction("unimplemented", instruction);}});
+        
+        instruction_set[0] = {"zero", [&] () {
+                                        if (instruction & 0x000F > 0) {
+                                            printInstruction("RET", instruction);
+                                        } else {
+                                            printInstruction("CLS", instruction);
+                                        }
+                                  }
+                             };
+        instruction_set[1] = {"0x1nnn: JP addr", [&] (){printInstruction("0x1nnn: JP addr", instruction); pc = instruction & 0x0FFF;}};
+        
+    }
+    
     void emulateCycle() {
         //Fetch
-        instruction = memory[pc] << 8 | memory[pc + 1]; // 1 instr = 2 bytes = 2 memory locations
+        instruction = ((memory[pc] << 8) | memory[pc + 1]); // 1 instr = 2 bytes = 2 memory locations 
+        //Decode & Execute
+        instruction_set[(instruction & 0xF000) >> 12].function();
+        
         pc += 2;
         
-        //Decode
-        switch (instruction & 0xF000) {
-            //Execute
-            
-            default:
-                std::cout << " Unknown Instruction: " << std::hex << instruction << std::endl;
-                break;            
-        } 
+    }
+    
+    void printInstruction(std::string descr, unsigned short hexvalue) {
+        std::cout << descr << " -> 0x" << std::hex << hexvalue << " memory[" << (short)memory[pc] << "|" << (short)memory[pc+1] << "]";
     }
 		
 /* Fields */
@@ -107,10 +126,15 @@ public: //protected:
 		unsigned char d;
 		unsigned char s;
 	} timers_t;
+    
+    typedef struct {
+        std::string dissasembly;
+        std::function<void()> function;
+    } instruction_t;
 
 public: //private:
 	
-	int instruction;
+	unsigned short instruction;
 	
 	std::vector<unsigned char> memory; //Memory allocation
 	unsigned short pc; //Program counter (16 bit)
@@ -118,8 +142,10 @@ public: //private:
 	std::vector<unsigned char> V;
 	stack_t stack;
 	timers_t timers;
-	std::vector<unsigned char> scrbuf; // Monochrome display buffer
-	
+	std::vector<unsigned char> scrbuf; // Monochrome display buffer	
+    
+    std::vector<instruction_t> instruction_set;
+    
 	const unsigned char chip8fontset[80] =
 	{ 
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
