@@ -1,5 +1,5 @@
-#ifndef EMULATORH
-#define EMULATORH
+#ifndef EMULATOR_H
+#define EMULATOR_H
 
 #include <iostream>
 #include <iomanip>
@@ -9,17 +9,21 @@
 #include <functional>
 #include <thread>
 #include <chrono>
+//Temporary?
 #include <windows.h>
-
 #include <bitset>
+
+#include "MonochromeScreen.hpp"
 
 class Emulator {
 public:
 
 	Emulator() {	
+        screen = new MonochromeScreen(SCREEN_WIDTH, SCREEN_HEIGHT, "CHIP Towers");        
+        
 		memory = std::vector<unsigned char>(4096);
 		V = std::vector<unsigned char>(16);	
-		scrbuf = std::vector<bool>(64 * 32, {false});	
+		scrbuf = std::vector<bool>(SCREEN_WIDTH * SCREEN_HEIGHT, {false});	
 		stack.stack = std::vector<unsigned short>(16);
 		stack.sp = 0;
 		timers.d = 0;
@@ -102,7 +106,7 @@ public:
             
             emulateCycle();
             
-            Sleep(100);
+            Sleep(1);
             
         } while (q != 'q');
     }
@@ -142,6 +146,7 @@ public: //private:
                                         } else {
                                             printInstruction("CLS", instruction);
                                             scrbuf.assign(scrbuf.size(), false);
+                                            drawFlag = true;
                                         }
                                   }
                              };
@@ -230,9 +235,11 @@ public: //private:
         
         if (drawFlag) {
             
+            screen->display(scrbuf);
+            
             if (DRAW_ON_CONSOLE) {
                 drawScreenToConsole(); 
-            }    
+            }   
           
             drawFlag = false;
         }
@@ -325,7 +332,7 @@ public: //protected:
 public: //private:
 	
 	unsigned short instruction;
-    bool drawFlag;
+    bool drawFlag;    
 	
 	std::vector<unsigned char> memory; //Memory allocation
 	unsigned short pc; //Program counter (16 bit)
@@ -338,6 +345,8 @@ public: //private:
     std::vector<instruction_t> instruction_set_base;
     std::vector<instruction_t> instruction_set_8x;
     std::vector<instruction_t> instruction_set_Fx;
+    
+    MonochromeScreen* screen;
     
 	
 };
