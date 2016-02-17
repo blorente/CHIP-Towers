@@ -243,4 +243,113 @@ TEST_CASE("Simple 8LD working", "[Emulator]") {
     
 }
 
+TEST_CASE("Simple AND working", "[Emulator]") {
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0xFF;
+    e.V[0] = 0X0;
+    e.memory[e.pc] = 0x82;
+    e.memory[e.pc + 1] = 0x02;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0x0);
+    REQUIRE(e.pc == 0x0202);
+}
+
+TEST_CASE("Simple OR working", "[Emulator]") {
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0xFF;
+    e.V[0] = 0X0;
+    e.memory[e.pc] = 0x82;
+    e.memory[e.pc + 1] = 0x01;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0xFF);
+    REQUIRE(e.pc == 0x0202);
+}
+
+TEST_CASE("Simple XOR working", "[Emulator]") {
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0xFF;
+    e.V[0] = 0X0F;
+    e.memory[e.pc] = 0x82;
+    e.memory[e.pc + 1] = 0x03;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0xF0);
+    REQUIRE(e.pc == 0x0202);
+}
+
+TEST_CASE("Simple ADD VV working", "[Emulator]") {
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0xF1;
+    e.V[0] = 0X0F;
+    e.memory[e.pc] = 0x82;
+    e.memory[e.pc + 1] = 0x04;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0x00);
+    REQUIRE(e.V[0XF] == 1);
+    REQUIRE(e.pc == 0x0202);
+}
+
+TEST_CASE("Simple SUB VV working", "[Emulator]") {
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x0F;
+    e.V[0] = 0X10;
+    e.memory[e.pc] = 0x82;
+    e.memory[e.pc + 1] = 0x05;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0x00);
+    REQUIRE(e.V[0XF] == 1);
+    REQUIRE(e.pc == 0x0202);
+}
+
+TEST_CASE("Simple SHR VV working", "[Emulator]") {
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x00;
+    e.V[0] = 0X11;
+    e.memory[e.pc] = 0x82;
+    e.memory[e.pc + 1] = 0x06;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0x08);
+    REQUIRE(e.V[0XF] == 1);
+    REQUIRE(e.pc == 0x0202);
+}
+
+TEST_CASE("Simple SUB VVy working", "[Emulator]") {
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x0F;
+    e.V[0] = 0X10;
+    e.memory[e.pc] = 0x82;
+    e.memory[e.pc + 1] = 0x07;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0x01);
+    REQUIRE(e.V[0XF] == 0);
+    REQUIRE(e.pc == 0x0202);
+}
+
+TEST_CASE("Simple SHL VV working", "[Emulator]") {
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x00;
+    e.V[0] = 0X81;
+    e.memory[e.pc] = 0x82;
+    e.memory[e.pc + 1] = 0x0E;
+    e.emulateCycle();
+    REQUIRE(e.V[2] == 0x02);
+    REQUIRE(e.V[0XF] == 1);
+    REQUIRE(e.pc == 0x0202);
+}
+
 #endif

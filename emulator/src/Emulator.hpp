@@ -117,8 +117,30 @@ public: //private:
         instruction_set_base[0x8] = {"", [&] () {printInstruction(instruction_set_8x[instruction & 0x000F].dissasembly, instruction);
                                                  instruction_set_8x[instruction & 0x000F].function();}};
                                                  
-        instruction_set_8x[0x0] = {"8xy0: LD Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x00F0) >> 4];}};
-              
+        instruction_set_8x[0x0] = {"0x8xy0: LD Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x00F0) >> 4];}};
+        instruction_set_8x[0x1] = {"0x8xy1: OR Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] |= V[(instruction & 0x00F0) >> 4];}};
+        instruction_set_8x[0x2] = {"0x8xy2: AND Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] &= V[(instruction & 0x00F0) >> 4];}};
+        instruction_set_8x[0x3] = {"0x8xy3: XOR Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] ^= V[(instruction & 0x00F0) >> 4];}};
+        instruction_set_8x[0x4] = {"0x8xy4: ADD Vx, Vy", [&] () {int res = V[(instruction & 0x0F00) >> 8] + V[(instruction & 0x00F0) >> 4];
+                                                                 if (res > 0xFF) {V[0xF] = 1;} else {V[0xF] = 0;}
+                                                                 V[(instruction & 0x0F00) >> 8] = res & 0xFF;}};
+        instruction_set_8x[0x5] = {"0x8xy5: SUB Vx, Vy", [&] () {unsigned char xx = (instruction & 0x0F00) >> 8;
+                                                                 unsigned char yy = (instruction & 0x00F0) >> 4;            
+                                                                 if ( V[xx] < V[yy]) {V[xx] = 0x0; V[0xF] = 1;} 
+                                                                 else {V[xx] = V[xx] - V[yy]; V[0xF] = 0;}}};
+        instruction_set_8x[0x6] = {"0x8xy6: SHR Vx, Vy", [&] () {unsigned char xx = (instruction & 0x0F00) >> 8;
+                                                                 unsigned char yy = (instruction & 0x00F0) >> 4;            
+                                                                 V[0xF] = V[yy] && 1;
+                                                                 V[xx] = V[yy] >> 1;}};
+        instruction_set_8x[0x7] = {"0x8xy7: SUB Vy, Vx", [&] () {unsigned char xx = (instruction & 0x0F00) >> 8;
+                                                                 unsigned char yy = (instruction & 0x00F0) >> 4;            
+                                                                 if ( V[xx] > V[yy]) {V[xx] = 0x0; V[0xF] = 1;} 
+                                                                 else {V[xx] = V[yy] - V[xx]; V[0xF] = 0;}}};
+        instruction_set_8x[0xE] = {"0x8xy6: SHL Vx, Vy", [&] () {unsigned char xx = (instruction & 0x0F00) >> 8;
+                                                                 unsigned char yy = (instruction & 0x00F0) >> 4;            
+                                                                 V[0xF] = V[yy] && 0x80;
+                                                                 V[xx] = V[yy] << 1;}};
+                
             
     }
     
