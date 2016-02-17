@@ -35,14 +35,17 @@ public:
         setupInstructionSet();
 	}
 		
-	~Emulator(){}
+	~Emulator(){
+        
+        delete screen;
+    }
     
 private:
     
     const unsigned char SCREEN_WIDTH = 64;
     const unsigned char SCREEN_HEIGHT = 32;
     
-    const bool DRAW_ON_CONSOLE = true;
+    const bool DRAW_ON_CONSOLE = false;
     
     const unsigned char chip8fontset[80] = 
     { 
@@ -70,13 +73,7 @@ public:
 
 	void reboot() {
         initComponents();
-        loadFontset();
-        
-        /*
-        for (int i = 0; i < sizeof(chip8fontset) / 5; i++) {
-            drawSprite(i, i*5, 5);
-        } */
-        drawSprite(0, 0, 5);
+        loadFontset();   
     }
     
 	void loadROM(std::string filename) {
@@ -96,7 +93,7 @@ public:
         }
     }
     
-	void Run() {
+	void run() {
         int cycle = 0;
         char q;
         do {
@@ -141,10 +138,12 @@ public: //private:
         
         
         instruction_set_base[0] = {"zero", [&] () {
-                                        if (instruction & 0x000F > 0) {
-                                            printInstruction("RET", instruction);
+                                        if ((instruction & 0x000F) > 0) {
+                                            printInstruction("RET" + (instruction & 0x000F), instruction);
+                                            pc = stack.stack[stack.sp - 1];
+                                            stack.sp --; 
                                         } else {
-                                            printInstruction("CLS", instruction);
+                                            printInstruction("CLS" + (instruction & 0x000F), instruction);
                                             scrbuf.assign(scrbuf.size(), false);
                                             drawFlag = true;
                                         }

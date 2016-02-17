@@ -17,7 +17,7 @@ public:
             (
                 windowName,
                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                1200, 600,
+                600, 300,
                 SDL_WINDOW_SHOWN
                 );
                 
