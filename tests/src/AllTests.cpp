@@ -200,6 +200,21 @@ TEST_CASE("Simple SE VV working", "[Emulator]") {
     
 }
 
+TEST_CASE("Simple SNE VV working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[2] = 0x30;
+    e.V[4] = 0x60;
+    e.memory[e.pc] = 0x92;
+    e.memory[e.pc + 1] = 0x40;
+    e.emulateCycle();
+    REQUIRE(e.V[2] != e.V[4]);
+    REQUIRE(e.pc == 0x0204);
+    
+}
+
 TEST_CASE("Simple LD working", "[Emulator]") {
     
     Emulator e = Emulator();
@@ -301,11 +316,11 @@ TEST_CASE("Simple SUB VV working", "[Emulator]") {
     e.reboot();
     
     e.V[2] = 0x0F;
-    e.V[0] = 0X10;
+    e.V[0] = 0X11;
     e.memory[e.pc] = 0x82;
     e.memory[e.pc + 1] = 0x05;
     e.emulateCycle();
-    REQUIRE(e.V[2] == 0x00);
+    REQUIRE(e.V[2] == 0xFD);
     REQUIRE(e.V[0XF] == 1);
     REQUIRE(e.pc == 0x0202);
 }
@@ -351,5 +366,32 @@ TEST_CASE("Simple SHL VV working", "[Emulator]") {
     REQUIRE(e.V[0XF] == 1);
     REQUIRE(e.pc == 0x0202);
 }
+
+TEST_CASE("Simple LDI working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.memory[e.pc] = 0xA2;
+    e.memory[e.pc + 1] = 0x0E;
+    e.emulateCycle();
+    REQUIRE(e.I == 0x20E);
+    REQUIRE(e.pc == 0x0202);
+    
+}
+
+TEST_CASE("Simple JP working", "[Emulator]") {
+    
+    Emulator e = Emulator();
+    e.reboot();
+    
+    e.V[0] = 0X20;
+    e.memory[e.pc] = 0xB2;
+    e.memory[e.pc + 1] = 0x0E;
+    e.emulateCycle();
+    REQUIRE(e.pc == 0x022E);
+    
+}
+
 
 #endif
