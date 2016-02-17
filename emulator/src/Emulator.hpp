@@ -11,6 +11,8 @@
 #include <chrono>
 #include <windows.h>
 
+#include <bitset>
+
 class Emulator {
 public:
 
@@ -35,6 +37,8 @@ private:
     
     const unsigned char SCREEN_WIDTH = 64;
     const unsigned char SCREEN_HEIGHT = 32;
+    
+    const bool DRAW_ON_CONSOLE = true;
     
     const unsigned char chip8fontset[80] = 
     { 
@@ -68,7 +72,7 @@ public:
         for (int i = 0; i < sizeof(chip8fontset) / 5; i++) {
             drawSprite(i, i*5, 5);
         } */
-        drawSprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 5);
+        drawSprite(0, 0, 5);
     }
     
 	void loadROM(std::string filename) {
@@ -98,7 +102,7 @@ public:
             
             emulateCycle();
             
-            Sleep(400);
+            Sleep(100);
             
         } while (q != 'q');
     }
@@ -108,7 +112,7 @@ public: //private:
     void initComponents() {       
         memory.assign(memory.size(), 0x0);     
         V.assign(V.size(), 0x0);		
-        scrbuf.assign((64 * 32), 0x0);
+        scrbuf.assign((64 * 32), false);
         stack.stack.assign(16, 0x0); 
         pc = 0x200;
         I = 0x0;        
@@ -137,6 +141,7 @@ public: //private:
                                             printInstruction("RET", instruction);
                                         } else {
                                             printInstruction("CLS", instruction);
+                                            scrbuf.assign(scrbuf.size(), false);
                                         }
                                   }
                              };
@@ -224,7 +229,23 @@ public: //private:
         instruction_set_base[(instruction & 0xF000) >> 12].function();
         
         if (drawFlag) {
-            //Draw screen
+            
+            if (DRAW_ON_CONSOLE) {
+                drawScreenToConsole(); 
+            }    
+          
+            drawFlag = false;
+        }
+        
+    }
+    
+    void printInstruction(std::string descr, unsigned short hexvalue) {
+        std::cout << descr << " -> 0x" << std::hex << hexvalue << " memory[" << (short)memory[pc-2] << "|" << (short)memory[pc-1] << "] [" 
+                                                                             << (short)memory[pc] << "|" << (short)memory[pc+1] << "]" << std::endl;
+    }
+    
+    void drawScreenToConsole() {
+          //Draw screen
             for (int col = 0; col < SCREEN_WIDTH+2; col++)  {
                 std::cout << "_";
             }          
@@ -236,7 +257,7 @@ public: //private:
             for (int row = 0; row < SCREEN_HEIGHT; row++) {
                 std::cout << "|";
                 for (int col = 0; col < SCREEN_WIDTH; col++) {
-                    if (scrbuf[row*col] == true) {std::cout << "X";} else {std::cout << " ";}
+                    if (scrbuf[(row*SCREEN_WIDTH)+col] == true) {std::cout << "X";} else {std::cout << " ";}
                 }
                 std::cout << "|" << std::endl;
             }
@@ -244,15 +265,6 @@ public: //private:
                 std::cout << "_";
             } 
             std::cout << std::endl; 
-            
-            drawFlag = false;
-        }
-        
-    }
-    
-    void printInstruction(std::string descr, unsigned short hexvalue) {
-        std::cout << descr << " -> 0x" << std::hex << hexvalue << " memory[" << (short)memory[pc-2] << "|" << (short)memory[pc-1] << "] [" 
-                                                                             << (short)memory[pc] << "|" << (short)memory[pc+1] << "]" << std::endl;
     }
     
     void drawSprite(unsigned char posx, unsigned char posy, unsigned char n) {
@@ -264,11 +276,13 @@ public: //private:
         unsigned char pixel;
         bool overwrite = false;
         for (int row = 0; row < n; row++) {            
-            spriteRow = memory[I + row];            
+            spriteRow = memory[I + row];  
+            std::bitset<8> x(spriteRow);
+            std::cout << x << std::endl;          
             for (int col = 0; col < 8; col++) {                              
                 pixel =  (spriteRow & (0x80 >> col)) ;
                 if (pixel > 0) {
-                    overwrite = drawPixel((posx+col) % SCREEN_WIDTH, (posy + row) % SCREEN_HEIGHT);
+                    overwrite = drawPixel((col + posx), (row + posy));                   
                     if (overwrite) {
                         V[0xF] = 1;
                     }
@@ -278,13 +292,14 @@ public: //private:
         drawFlag = true;
     }
     
-    bool drawPixel(int x, int y) {
+    bool drawPixel(unsigned char x, unsigned char y) {
         
         bool res = false;
-        if (scrbuf[x + (y * SCREEN_WIDTH)] == true) {
+        int pos = x + (y * SCREEN_WIDTH);
+        if (scrbuf[pos] == true) {
             res = true;
         }
-        scrbuf[x + (y * SCREEN_WIDTH)] = !scrbuf[x + (y * SCREEN_WIDTH)];
+        scrbuf[pos] = !scrbuf[pos];
         
         return res;
     }

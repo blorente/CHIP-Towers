@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 	
     Emulator emulator = Emulator();
     emulator.reboot();
-    emulator.loadROM("15PUZZLE");
+    emulator.loadROM("INVADERS");
     emulator.Run();
     /*
 	if (SDL_Init(SDL_INIT_VIDEO) != 0){
