@@ -8,8 +8,11 @@
 #include <fstream>
 #include <functional>
 #include <bitset>
+#include <SDL.h>
+#include <SDL_render.h>
 
 #include "MonochromeScreen.hpp"
+#include "Keypad.hpp"
 
 class Emulator {
 public:
@@ -20,12 +23,13 @@ public:
             SDL_Init(SDL_INIT_EVERYTHING);
         }
         	
-        screen = new MonochromeScreen(SCREEN_WIDTH, SCREEN_HEIGHT, "CHIP Towers");        
+        screen = new MonochromeScreen(SCREEN_WIDTH, SCREEN_HEIGHT, "CHIP Towers");  
+        keypad = new Keypad();      
         
 		memory = std::vector<unsigned char>(4096);
 		V = std::vector<unsigned char>(16);	
 		scrbuf = std::vector<bool>(SCREEN_WIDTH * SCREEN_HEIGHT, {false});	
-		stack.stack = std::vector<unsigned short>(16);
+        stack.stack = std::vector<unsigned short>(16);
 		stack.sp = 0;
 		timers.d = 0;
 		timers.s = 0;
@@ -39,6 +43,7 @@ public:
 	~Emulator(){
         
         delete screen;
+        delete keypad;
         SDL_Quit();
     }
     
@@ -48,7 +53,7 @@ private:
     const unsigned char SCREEN_HEIGHT = 32;
     
     const bool DRAW_ON_CONSOLE = false;
-    const bool DEBUG_MODE = true;
+    const bool DEBUG_MODE = false;
     const int fps = 60;
     
     const unsigned char chip8fontset[80] = 
@@ -102,6 +107,8 @@ public:
         bool running = true;        
         SDL_Event sdlEvent;
         
+        int i = 0;
+        
         while (running)  { 
             startingTick = SDL_GetTicks();
                   
@@ -111,6 +118,17 @@ public:
                 if (sdlEvent.type == SDL_QUIT) {
                     running = false;
                     break;
+                } else if (sdlEvent.type == SDL_KEYDOWN) {
+                    keypad->processKeyDown(sdlEvent);
+                } else if (sdlEvent.type == SDL_KEYUP) {
+                    keypad->processKeyUp(sdlEvent);
+                }
+            }
+            
+            if (DEBUG_MODE) {
+                i = (i + 1) % (fps/2);
+                if (i == 0) {
+                    keypad->print();
                 }
             }
             
@@ -153,11 +171,11 @@ public: //private:
         
         instruction_set_base[0] = {"zero", [&] () {
                                         if ((instruction & 0x000F) > 0) {
-                                            printInstruction("RET" + (instruction & 0x000F), instruction);
+                                            printInstruction("0x00EE: RET" + (instruction & 0x000F), instruction);
                                             pc = stack.stack[stack.sp - 1];
                                             stack.sp --; 
                                         } else {
-                                            printInstruction("CLS" + (instruction & 0x000F), instruction);
+                                            printInstruction("0x00E0: CLS" + (instruction & 0x000F), instruction);
                                             scrbuf.assign(scrbuf.size(), false);
                                             drawFlag = true;
                                         }
@@ -358,13 +376,14 @@ public: //private:
 	std::vector<unsigned char> V;
 	stack_t stack;
 	timers_t timers;
-	std::vector<bool> scrbuf; // Monochrome display buffer	
+	std::vector<bool> scrbuf; // Monochrome display buffer
     
     std::vector<instruction_t> instruction_set_base;
     std::vector<instruction_t> instruction_set_8x;
     std::vector<instruction_t> instruction_set_Fx;
     
     MonochromeScreen* screen;
+    Keypad* keypad;
     
 	
 };
