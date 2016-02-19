@@ -18,7 +18,12 @@
 class Emulator {
 public:
 
-	Emulator() {	
+	Emulator() {
+        
+        if (SDL_WasInit(0) != SDL_INIT_EVERYTHING) {
+            SDL_Init(SDL_INIT_EVERYTHING);
+        }
+        	
         screen = new MonochromeScreen(SCREEN_WIDTH, SCREEN_HEIGHT, "CHIP Towers");        
         
 		memory = std::vector<unsigned char>(4096);
@@ -38,6 +43,7 @@ public:
 	~Emulator(){
         
         delete screen;
+        SDL_Quit();
     }
     
 private:
@@ -46,6 +52,8 @@ private:
     const unsigned char SCREEN_HEIGHT = 32;
     
     const bool DRAW_ON_CONSOLE = false;
+    const bool DEBUG_MODE = true;
+    const int fps = 60;
     
     const unsigned char chip8fontset[80] = 
     { 
@@ -94,18 +102,28 @@ public:
     }
     
 	void run() {
-        int cycle = 0;
-        char q;
-        do {
-            //std::cin >> q;
-            //std::cin.get();     
-            std::cout << "Cycle: " << std::dec << cycle++ << " | ";
-            
+        Uint32 startingTick;
+        bool running = true;        
+        SDL_Event sdlEvent;
+        
+        while (running)  { 
+            startingTick = SDL_GetTicks();
+                  
             emulateCycle();
             
-            Sleep(1);
+            while( SDL_PollEvent(&sdlEvent)) {
+                if (sdlEvent.type == SDL_QUIT) {
+                    running = false;
+                    break;
+                }
+            }
             
-        } while (q != 'q');
+            // Cap framerate
+            if ((1000 / fps) > SDL_GetTicks() - startingTick) {
+                SDL_Delay((1000 / fps) - (SDL_GetTicks() - startingTick)); 
+            }           
+                       
+        };
     }
 	
 public: //private:    
@@ -246,8 +264,10 @@ public: //private:
     }
     
     void printInstruction(std::string descr, unsigned short hexvalue) {
+        if (DEBUG_MODE) {
         std::cout << descr << " -> 0x" << std::hex << hexvalue << " memory[" << (short)memory[pc-2] << "|" << (short)memory[pc-1] << "] [" 
                                                                              << (short)memory[pc] << "|" << (short)memory[pc+1] << "]" << std::endl;
+        }
     }
     
     void drawScreenToConsole() {
@@ -283,8 +303,11 @@ public: //private:
         bool overwrite = false;
         for (int row = 0; row < n; row++) {            
             spriteRow = memory[I + row];  
-            std::bitset<8> x(spriteRow);
-            std::cout << x << std::endl;          
+            
+            if (DEBUG_MODE) {
+                std::bitset<8> x(spriteRow);
+                std::cout << x << std::endl; 
+            }         
             for (int col = 0; col < 8; col++) {                              
                 pixel =  (spriteRow & (0x80 >> col)) ;
                 if (pixel > 0) {

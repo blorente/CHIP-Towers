@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     } else {
         emulator.loadROM("INVADERS");            
     }
-    emulator.Run();
+    emulator.run();
     
     return 0;
 }
