@@ -8,8 +8,8 @@
 #include <fstream>
 #include <functional>
 #include <bitset>
+#include <random>
 #include <SDL.h>
-#include <SDL_render.h>
 
 #include "MonochromeScreen.hpp"
 #include "Keypad.hpp"
@@ -219,6 +219,13 @@ public: //private:
                                                                  I = instruction & 0x0FFF;}};
         instruction_set_base[0xB] = {"0xBnnn: JP V0, addr", [&] () {printInstruction("0xBnnn: JP V0, addr", instruction); 
                                                                  pc = V[0] + (instruction & 0x0FFF);}};
+        
+        instruction_set_base[0xC] = {"Cxkk: RND Vx, byte", [&] () {printInstruction("Cxkk: RND Vx, byte", instruction);
+                                                            unsigned char rnd = std::rand() % 256;
+                                                            unsigned short x = (instruction & 0x0F00) >> 8;
+                                                            unsigned short kk= (instruction & 0x00FF);
+                                                            V[x] = rnd & kk; 
+                                                            }};
         
         instruction_set_base[0xD] = {"0xDxyn: DRW Vx, Vy, nibble", [&] () {printInstruction("0xDxyn: DRW Vx, Vy, nibble", instruction);
                                                                            unsigned char xx = (instruction & 0x0F00) >> 8;
