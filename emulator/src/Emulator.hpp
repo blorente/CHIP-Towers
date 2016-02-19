@@ -153,7 +153,7 @@ public:
         };
     }
 	
-public: //private:    
+private:    
 
     void initComponents() {       
         memory.assign(memory.size(), 0x0);     
@@ -386,7 +386,7 @@ public: //private:
     }
 		
 /* Fields */
-public: //protected:
+protected:
 	
 	typedef struct {
 		unsigned char sp;
