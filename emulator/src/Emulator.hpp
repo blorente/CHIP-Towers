@@ -7,10 +7,6 @@
 #include <vector>
 #include <fstream>
 #include <functional>
-#include <thread>
-#include <chrono>
-//Temporary?
-#include <windows.h>
 #include <bitset>
 
 #include "MonochromeScreen.hpp"
