@@ -54,7 +54,8 @@ private:
     
     const bool DRAW_ON_CONSOLE = false;
     const bool DEBUG_MODE = false;
-    const int fps = 2400;
+    const bool DEBUG_INPUT_MODE = false;
+    const int fps = 60;
     
     const unsigned char chip8fontset[80] = 
     { 
@@ -107,7 +108,7 @@ public:
         bool running = true;        
         SDL_Event sdlEvent;
         
-        int i = 0;
+        int cycle = 0;
         
         while (running)  { 
             startingTick = SDL_GetTicks();
@@ -125,17 +126,29 @@ public:
                 }
             }
             
-            if (DEBUG_MODE) {
-                i = (i + 1) % (fps/2);
-                if (i == 0) {
+            cycle = (cycle + 1) % (fps);
+            
+            if (cycle % 4 == 0) {
+                if (timers.d == 0) {
+                    timers.d = 60;
+                } else {
+                    timers.d--;
+                }
+            }
+            
+            if (DEBUG_INPUT_MODE) {                
+                if (cycle == 0) {
                     keypad->print();
                 }
             }
             
+            SDL_Delay(1);
+            
+            /*
             // Cap framerate
-            if ((1000 / fps) > SDL_GetTicks() - startingTick) {
+            if ((1000.0 / fps) > (SDL_GetTicks() - startingTick)) {
                 SDL_Delay((1000 / fps) - (SDL_GetTicks() - startingTick)); 
-            }           
+            } */          
                        
         };
     }
