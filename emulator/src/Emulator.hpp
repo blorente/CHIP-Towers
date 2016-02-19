@@ -54,7 +54,7 @@ private:
     
     const bool DRAW_ON_CONSOLE = false;
     const bool DEBUG_MODE = false;
-    const int fps = 60;
+    const int fps = 2400;
     
     const unsigned char chip8fontset[80] = 
     { 
@@ -213,6 +213,19 @@ public: //private:
                                                                            unsigned char n =  (instruction & 0x000F);
                                                                            drawSprite(V[xx], V[yy], n);}};
         
+        instruction_set_base[0xE] = {"", [&] () {if ((instruction & 0x00FF) == 0x9E) {
+                                                    printInstruction("Ex9E: SKP Vx", instruction);
+                                                    if (keypad->isKeyPressed(V[(instruction & 0x0F00) >> 8])) {
+                                                        pc += 2;
+                                                    }
+                                                 } else if ((instruction & 0x00FF) == 0xA1) {
+                                                    printInstruction("ExA1: SKNP Vx", instruction);
+                                                    if (!keypad->isKeyPressed(V[(instruction & 0x0F00) >> 8])) {
+                                                        pc += 2;
+                                                    } 
+                                                 }
+                                                 }};
+        
         instruction_set_base[0xF] = {"", [&] () {printInstruction(instruction_set_Fx[instruction & 0x00FF].dissasembly, instruction); 
                                                                  instruction_set_Fx[instruction & 0x00FF].function();}};
                                                                                           
@@ -240,7 +253,12 @@ public: //private:
                                                                  V[0xF] = V[yy] && 0x80;
                                                                  V[xx] = V[yy] << 1;}};
         instruction_set_Fx[0x07] = {"0xFx07: LD Vx, DT", [&] () {V[(instruction & 0x0F00) >> 8] = timers.d;}};  
-        //instruction_set_Fx[0x0A] = {"Fx0A: LD Vx, K", [&] () {V[(instruction & 0x0F00) >> 8] = timers.d;}};    
+        instruction_set_Fx[0x0A] = {"0xFx0A: LD Vx, K", [&] () {if (!keypad->isAnyKeyPressed()) {
+                                                                   pc -= 2; 
+                                                                } else {
+                                                                    V[(instruction & 0x0F00) >> 8] = keypad->lastKeyPressed();
+                                                                }
+                                                                }};    
         instruction_set_Fx[0x15] = {"0xFx15: LD DT, Vx", [&] () {timers.d = V[(instruction & 0x0F00) >> 8];}};    
         instruction_set_Fx[0x18] = {"0xFx18: LD ST, Vx", [&] () {timers.s = V[(instruction & 0x0F00) >> 8];}};         
         instruction_set_Fx[0x1E] = {"0xFx1E: ADD I, Vx", [&] () {I += V[(instruction & 0x0F00) >> 8];}};    
