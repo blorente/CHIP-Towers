@@ -1,9 +1,7 @@
 #include <iostream>
-#include "other.cpp"
 #include "Emulator.hpp"
 #include "SDL.h"
 
-extern void doSomeStuff();
 
 int main(int argc, char *argv[]) {
 	
