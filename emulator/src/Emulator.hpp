@@ -23,21 +23,21 @@ public:
             SDL_Init(SDL_INIT_EVERYTHING);
         }
         	
-        screen = new MonochromeScreen(SCREEN_WIDTH, SCREEN_HEIGHT, "CHIP Towers");  
+        screen = new MonochromeScreen(screen_width, screen_height, "CHIP Towers");  
         keypad = new Keypad();      
         
 		memory = std::vector<unsigned char>(4096);
 		V = std::vector<unsigned char>(16);	
-		scrbuf = std::vector<bool>(SCREEN_WIDTH * SCREEN_HEIGHT, {false});	
+		scrbuf = std::vector<bool>(screen_width * screen_height, {false});	
         stack.stack = std::vector<unsigned short>(16);
 		stack.sp = 0;
 		timers.d = 0;
 		timers.s = 0;
         I = 0;
         
-        drawFlag = false;
+        draw_flag = false;
         
-        setupInstructionSet();
+        setup_instruction_set();
 	}
 		
 	~Emulator(){
@@ -49,15 +49,15 @@ public:
     
 private:
     
-    const unsigned char SCREEN_WIDTH = 64;
-    const unsigned char SCREEN_HEIGHT = 32;
+    const unsigned char screen_width = 64;
+    const unsigned char screen_height = 32;
     
-    const bool DRAW_ON_CONSOLE = false;
-    const bool DEBUG_MODE = false;
-    const bool DEBUG_INPUT_MODE = false;
+    const bool draw_on_console = false;
+    const bool debug_instructions_enabled = false;
+    const bool debug_input_enabled = false;
     const int fps = 60;
     
-    const unsigned char chip8fontset[80] = 
+    const unsigned char chip8_fontset[80] = 
     { 
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -82,11 +82,11 @@ private:
 public:
 
 	void reboot() {
-        initComponents();
-        loadFontset();   
+        init_components();
+        load_fontset();   
     }
     
-	void loadROM(std::string filename) {
+	void load_rom(std::string filename) {
         std::cout << filename << std::endl;
         char buf[memory.size() - 512];     
         
@@ -104,25 +104,25 @@ public:
     }
     
 	void run() {
-        Uint32 startingTick;
+        Uint32 starting_tick;
         bool running = true;        
-        SDL_Event sdlEvent;
+        SDL_Event sdl_event;
         
         int cycle = 0;
         
         while (running)  { 
-            startingTick = SDL_GetTicks();
+            starting_tick = SDL_GetTicks();
                   
-            emulateCycle();
+            emulate_cycle();
             
-            while( SDL_PollEvent(&sdlEvent)) {
-                if (sdlEvent.type == SDL_QUIT) {
+            while( SDL_PollEvent(&sdl_event)) {
+                if (sdl_event.type == SDL_QUIT) {
                     running = false;
                     break;
-                } else if (sdlEvent.type == SDL_KEYDOWN) {
-                    keypad->processKeyDown(sdlEvent);
-                } else if (sdlEvent.type == SDL_KEYUP) {
-                    keypad->processKeyUp(sdlEvent);
+                } else if (sdl_event.type == SDL_KEYDOWN) {
+                    keypad->process_key_down(sdl_event);
+                } else if (sdl_event.type == SDL_KEYUP) {
+                    keypad->process_key_up(sdl_event);
                 }
             }
             
@@ -136,7 +136,7 @@ public:
                 }
             }
             
-            if (DEBUG_INPUT_MODE) {                
+            if (debug_input_enabled) {                
                 if (cycle == 0) {
                     keypad->print();
                 }
@@ -144,109 +144,104 @@ public:
             
             SDL_Delay(1);
             
-            /*
-            // Cap framerate
-            if ((1000.0 / fps) > (SDL_GetTicks() - startingTick)) {
-                SDL_Delay((1000 / fps) - (SDL_GetTicks() - startingTick)); 
-            } */          
-                       
+                
         };
     }
 	
 private:    
 
-    void initComponents() {       
+    void init_components() {       
         memory.assign(memory.size(), 0x0);     
         V.assign(V.size(), 0x0);		
-        scrbuf.assign((64 * 32), false);
-        stack.stack.assign(16, 0x0); 
+        scrbuf.assign(scrbuf.size(), false);
+        stack.stack.assign(stack.stack.size(), 0x0); 
         pc = 0x200;
         I = 0x0;        
 		stack.sp = 0;
 		timers.d = 0;
 		timers.s = 0;    
-        drawFlag = false;              
+        draw_flag = false;              
     }
 	
 	
-	void loadFontset() {		
+	void load_fontset() {		
 		for (int i = 0; i < 80; i++) {
-			memory[i] = chip8fontset[i];			
+			memory[i] = chip8_fontset[i];			
 		}
 	}
     
-    void setupInstructionSet() {
+    void setup_instruction_set() {
         
-        instruction_set_base = std::vector<instruction_t>(36, {"unimplemented", [&] (){printInstruction("unimplemented", instruction);}});
-        instruction_set_8x = std::vector<instruction_t>(36, {"unimplemented", [&] (){printInstruction("unimplemented", instruction);}});
-        instruction_set_Fx = std::vector<instruction_t>(0x70, {"unimplemented", [&] (){printInstruction("unimplemented", instruction);}});
+        instruction_set_base = std::vector<instruction_t>(36, {"unimplemented", [&] (){print_instruction("unimplemented", instruction);}});
+        instruction_set_8x = std::vector<instruction_t>(36, {"unimplemented", [&] (){print_instruction("unimplemented", instruction);}});
+        instruction_set_Fx = std::vector<instruction_t>(0x70, {"unimplemented", [&] (){print_instruction("unimplemented", instruction);}});
         
         
         instruction_set_base[0] = {"zero", [&] () {
                                         if ((instruction & 0x000F) > 0) {
-                                            printInstruction("0x00EE: RET" + (instruction & 0x000F), instruction);
+                                            print_instruction("0x00EE: RET" + (instruction & 0x000F), instruction);
                                             pc = stack.stack[stack.sp - 1];
                                             stack.sp --; 
                                         } else {
-                                            printInstruction("0x00E0: CLS" + (instruction & 0x000F), instruction);
+                                            print_instruction("0x00E0: CLS" + (instruction & 0x000F), instruction);
                                             scrbuf.assign(scrbuf.size(), false);
-                                            drawFlag = true;
+                                            draw_flag = true;
                                         }
                                   }
                              };
-        instruction_set_base[0x1] = {"0x1nnn: JP addr", [&] (){printInstruction("0x1nnn: JP addr", instruction); pc = instruction & 0x0FFF;}};
-        instruction_set_base[0x2] = {"0x2nnn: CALL addr", [&] (){printInstruction("0x2nnn: CALL addr", instruction); 
+        instruction_set_base[0x1] = {"0x1nnn: JP addr", [&] (){print_instruction("0x1nnn: JP addr", instruction); pc = instruction & 0x0FFF;}};
+        instruction_set_base[0x2] = {"0x2nnn: CALL addr", [&] (){print_instruction("0x2nnn: CALL addr", instruction); 
                                                             stack.stack[stack.sp] = pc; 
                                                             stack.sp++;
                                                             pc = instruction & 0x0FFF;}};
-        instruction_set_base[0x3] = {"0x3xkk: SE Vx, kk", [&] () {printInstruction("0x3xkk: SE Vx, kk", instruction); 
+        instruction_set_base[0x3] = {"0x3xkk: SE Vx, kk", [&] () {print_instruction("0x3xkk: SE Vx, kk", instruction); 
                                                              if (V[(instruction & 0x0F00) >> 8] == (unsigned char) instruction & 0x00FF) {pc += 2;}}};
-        instruction_set_base[0x4] = {"0x4xkk: SNE Vx, kk", [&] () {printInstruction("0x4xkk: SNE Vx, kk", instruction); 
+        instruction_set_base[0x4] = {"0x4xkk: SNE Vx, kk", [&] () {print_instruction("0x4xkk: SNE Vx, kk", instruction); 
                                                              if (V[(instruction & 0x0F00) >> 8] != (unsigned char) instruction & 0x00FF) {pc += 2;}}};
-        instruction_set_base[0x5] = {"0x5xy0: SE Vx, Vy", [&] () {printInstruction("0x5xy0: SE Vx, Vy", instruction); 
+        instruction_set_base[0x5] = {"0x5xy0: SE Vx, Vy", [&] () {print_instruction("0x5xy0: SE Vx, Vy", instruction); 
                                                              if (V[(instruction & 0x0F00) >> 8] == V[(instruction & 0x00F0) >> 4]) {pc += 2;}}};
-        instruction_set_base[0x6] = {"0x6xkk: LD Vx, kk", [&] () {printInstruction("0x6xkk: LD Vx, kk", instruction); 
+        instruction_set_base[0x6] = {"0x6xkk: LD Vx, kk", [&] () {print_instruction("0x6xkk: LD Vx, kk", instruction); 
                                                              V[(instruction & 0x0F00) >> 8] = (unsigned char)(instruction & 0x00FF);}};
-        instruction_set_base[0x7] = {"0x7xkk: LD Vx, kk", [&] () {printInstruction("0x7xkk: LD Vx, kk", instruction); 
+        instruction_set_base[0x7] = {"0x7xkk: LD Vx, kk", [&] () {print_instruction("0x7xkk: LD Vx, kk", instruction); 
                                                             V[(instruction & 0x0F00) >> 8] += (unsigned char)(instruction & 0x00FF);}};       
                                                             
-        instruction_set_base[0x8] = {"", [&] () {printInstruction(instruction_set_8x[instruction & 0x000F].dissasembly, instruction);
+        instruction_set_base[0x8] = {"", [&] () {print_instruction(instruction_set_8x[instruction & 0x000F].dissasembly, instruction);
                                                  instruction_set_8x[instruction & 0x000F].function();}};
                                                  
-        instruction_set_base[0x9] = {"0x9xy0: SNE Vx, Vy", [&] () {printInstruction("0x9xy0: SKNE Vx, Vy", instruction); 
+        instruction_set_base[0x9] = {"0x9xy0: SNE Vx, Vy", [&] () {print_instruction("0x9xy0: SKNE Vx, Vy", instruction); 
                                                                     if (V[(instruction & 0x0F00) >> 8] != V[(instruction & 0x00F0) >> 4]) {pc += 2;}}};
-        instruction_set_base[0xA] = {"0xAnnn: LD I, addr", [&] () {printInstruction("0xAnnn: LD I, addr", instruction); 
+        instruction_set_base[0xA] = {"0xAnnn: LD I, addr", [&] () {print_instruction("0xAnnn: LD I, addr", instruction); 
                                                                  I = instruction & 0x0FFF;}};
-        instruction_set_base[0xB] = {"0xBnnn: JP V0, addr", [&] () {printInstruction("0xBnnn: JP V0, addr", instruction); 
+        instruction_set_base[0xB] = {"0xBnnn: JP V0, addr", [&] () {print_instruction("0xBnnn: JP V0, addr", instruction); 
                                                                  pc = V[0] + (instruction & 0x0FFF);}};
         
-        instruction_set_base[0xC] = {"Cxkk: RND Vx, byte", [&] () {printInstruction("Cxkk: RND Vx, byte", instruction);
+        instruction_set_base[0xC] = {"Cxkk: RND Vx, byte", [&] () {print_instruction("Cxkk: RND Vx, byte", instruction);
                                                             unsigned char rnd = std::rand() % 256;
                                                             unsigned short x = (instruction & 0x0F00) >> 8;
                                                             unsigned short kk= (instruction & 0x00FF);
                                                             V[x] = rnd & kk; 
                                                             }};
         
-        instruction_set_base[0xD] = {"0xDxyn: DRW Vx, Vy, nibble", [&] () {printInstruction("0xDxyn: DRW Vx, Vy, nibble", instruction);
+        instruction_set_base[0xD] = {"0xDxyn: DRW Vx, Vy, nibble", [&] () {print_instruction("0xDxyn: DRW Vx, Vy, nibble", instruction);
                                                                            unsigned char xx = (instruction & 0x0F00) >> 8;
                                                                            unsigned char yy = (instruction & 0x00F0) >> 4; 
                                                                            unsigned char n =  (instruction & 0x000F);
-                                                                           drawSprite(V[xx], V[yy], n);}};
+                                                                           draw_sprite(V[xx], V[yy], n);}};
         
         instruction_set_base[0xE] = {"", [&] () {if ((instruction & 0x00FF) == 0x9E) {
-                                                    printInstruction("Ex9E: SKP Vx", instruction);
-                                                    if (keypad->isKeyPressed(V[(instruction & 0x0F00) >> 8])) {
+                                                    print_instruction("Ex9E: SKP Vx", instruction);
+                                                    if (keypad->is_key_pressed(V[(instruction & 0x0F00) >> 8])) {
                                                         pc += 2;
                                                     }
                                                  } else if ((instruction & 0x00FF) == 0xA1) {
-                                                    printInstruction("ExA1: SKNP Vx", instruction);
-                                                    if (!keypad->isKeyPressed(V[(instruction & 0x0F00) >> 8])) {
+                                                    print_instruction("ExA1: SKNP Vx", instruction);
+                                                    if (!keypad->is_key_pressed(V[(instruction & 0x0F00) >> 8])) {
                                                         pc += 2;
                                                     } 
                                                  }
                                                  }};
         
-        instruction_set_base[0xF] = {"", [&] () {printInstruction(instruction_set_Fx[instruction & 0x00FF].dissasembly, instruction); 
+        instruction_set_base[0xF] = {"", [&] () {print_instruction(instruction_set_Fx[instruction & 0x00FF].dissasembly, instruction); 
                                                                  instruction_set_Fx[instruction & 0x00FF].function();}};
                                                                                           
         instruction_set_8x[0x0] = {"0x8xy0: LD Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x00F0) >> 4];}};
@@ -273,10 +268,10 @@ private:
                                                                  V[0xF] = V[yy] && 0x80;
                                                                  V[xx] = V[yy] << 1;}};
         instruction_set_Fx[0x07] = {"0xFx07: LD Vx, DT", [&] () {V[(instruction & 0x0F00) >> 8] = timers.d;}};  
-        instruction_set_Fx[0x0A] = {"0xFx0A: LD Vx, K", [&] () {if (!keypad->isAnyKeyPressed()) {
+        instruction_set_Fx[0x0A] = {"0xFx0A: LD Vx, K", [&] () {if (!keypad->is_any_key_pressed()) {
                                                                    pc -= 2; 
                                                                 } else {
-                                                                    V[(instruction & 0x0F00) >> 8] = keypad->lastKeyPressed();
+                                                                    V[(instruction & 0x0F00) >> 8] = keypad->last_key_pressed();
                                                                 }
                                                                 }};    
         instruction_set_Fx[0x15] = {"0xFx15: LD DT, Vx", [&] () {timers.d = V[(instruction & 0x0F00) >> 8];}};    
@@ -295,88 +290,88 @@ private:
                                                                     I = I + last + 1;}};            
     }
     
-    void emulateCycle() {
+    void emulate_cycle() {
         //Fetch
         instruction = ((memory[pc] << 8) | memory[pc + 1]); // 1 instr = 2 bytes = 2 memory locations 
         pc += 2;
         //Decode & Execute
         instruction_set_base[(instruction & 0xF000) >> 12].function();
         
-        if (drawFlag) {
+        if (draw_flag) {
             
             screen->display(scrbuf);
             
-            if (DRAW_ON_CONSOLE) {
-                drawScreenToConsole(); 
+            if (draw_on_console) {
+                draw_screen_to_console(); 
             }   
           
-            drawFlag = false;
+            draw_flag = false;
         }
         
     }
     
-    void printInstruction(std::string descr, unsigned short hexvalue) {
-        if (DEBUG_MODE) {
+    void print_instruction(std::string descr, unsigned short hexvalue) {
+        if (debug_instructions_enabled) {
         std::cout << descr << " -> 0x" << std::hex << hexvalue << " memory[" << (short)memory[pc-2] << "|" << (short)memory[pc-1] << "] [" 
                                                                              << (short)memory[pc] << "|" << (short)memory[pc+1] << "]" << std::endl;
         }
     }
     
-    void drawScreenToConsole() {
+    void draw_screen_to_console() {
           //Draw screen
-            for (int col = 0; col < SCREEN_WIDTH+2; col++)  {
+            for (int col = 0; col < screen_width+2; col++)  {
                 std::cout << "_";
             }          
             std::cout << std::endl;    
-            for (int col = 0; col < SCREEN_WIDTH+2; col++)  {
+            for (int col = 0; col < screen_width+2; col++)  {
                 std::cout << "_";
             }    
             std::cout << std::endl;
-            for (int row = 0; row < SCREEN_HEIGHT; row++) {
+            for (int row = 0; row < screen_height; row++) {
                 std::cout << "|";
-                for (int col = 0; col < SCREEN_WIDTH; col++) {
-                    if (scrbuf[(row*SCREEN_WIDTH)+col] == true) {std::cout << "X";} else {std::cout << " ";}
+                for (int col = 0; col < screen_width; col++) {
+                    if (scrbuf[(row*screen_width)+col] == true) {std::cout << "X";} else {std::cout << " ";}
                 }
                 std::cout << "|" << std::endl;
             }
-            for (int col = 0; col < SCREEN_WIDTH + 2; col++)  {
+            for (int col = 0; col < screen_width + 2; col++)  {
                 std::cout << "_";
             } 
             std::cout << std::endl; 
     }
     
-    void drawSprite(unsigned char posx, unsigned char posy, unsigned char n) {
+    void draw_sprite(unsigned char posx, unsigned char posy, unsigned char n) {
         //1 memory location = 8 bits = 8 pixels
         //n=2 -> xxxxxxxx = memory[I]
         //       xxxxxxxx = memory[I + 1]
         V[0xF] = 0;              
-        unsigned char spriteRow;  
+        unsigned char sprite_row;  
         unsigned char pixel;
         bool overwrite = false;
         for (int row = 0; row < n; row++) {            
-            spriteRow = memory[I + row];  
+            sprite_row = memory[I + row];  
             
-            if (DEBUG_MODE) {
-                std::bitset<8> x(spriteRow);
+            if (debug_instructions_enabled) {
+                std::bitset<8> x(sprite_row);
                 std::cout << x << std::endl; 
             }         
             for (int col = 0; col < 8; col++) {                              
-                pixel =  (spriteRow & (0x80 >> col)) ;
+                pixel =  (sprite_row & (0x80 >> col)) ;
                 if (pixel > 0) {
-                    overwrite = drawPixel((col + posx), (row + posy));                   
+                    overwrite = draw_pixel((col + posx), (row + posy));                   
                     if (overwrite) {
                         V[0xF] = 1;
                     }
                 }                
             }            
         }
-        drawFlag = true;
+        draw_flag = true;
     }
     
-    bool drawPixel(unsigned char x, unsigned char y) {
+    bool draw_pixel(unsigned char x, unsigned char y) {
         
         bool res = false;
-        int pos = x + (y * SCREEN_WIDTH);
+        int pos = x + (y * screen_width);
         if (scrbuf[pos] == true) {
             res = true;
         }
@@ -388,25 +383,25 @@ private:
 /* Fields */
 protected:
 	
-	typedef struct {
+	struct stack_t {
 		unsigned char sp;
 		std::vector<unsigned short>stack;
-	} stack_t;
+	};
 
-	typedef struct {
+	struct timers_t{
 		unsigned char d;
 		unsigned char s;
-	} timers_t;
+	};
     
-    typedef struct {
+    struct instruction_t {
         std::string dissasembly;
         std::function<void()> function;
-    } instruction_t;
+    };
 
 public: //private:
 	
 	unsigned short instruction;
-    bool drawFlag;    
+    bool draw_flag;    
 	
 	std::vector<unsigned char> memory; //Memory allocation
 	unsigned short pc; //Program counter (16 bit)

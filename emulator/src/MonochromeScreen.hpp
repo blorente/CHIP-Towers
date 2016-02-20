@@ -10,18 +10,18 @@ class MonochromeScreen {
     
 public:
     
-    MonochromeScreen(int pixelsWide, int pixelsHigh, const char* windowName) {
+    MonochromeScreen(int pixels_wide, int pixels_high, const char* window_name) {
         //Assignments
-        screenHeight = pixelsHigh;
-        screenWidth = pixelsWide;
+        screen_height = pixels_high;
+        screen_width = pixels_wide;
                  
-        std::vector< unsigned char > px(pixelsHigh * pixelsWide * 4, 0);
+        std::vector< unsigned char > px(pixels_high * pixels_wide * 4, 0);
         pixels = px;
         
         //SDL stuff
         window = window = SDL_CreateWindow
             (
-                windowName,
+                window_name,
                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                 600, 300,
                 SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
@@ -37,8 +37,8 @@ public:
             renderer,
             SDL_PIXELFORMAT_ARGB8888, //Pixel format, RGBA with 8 bits
             SDL_TEXTUREACCESS_STREAMING, //For textures that change frequently
-            screenWidth,
-            screenHeight
+            screen_width,
+            screen_height
         );
         
         
@@ -75,7 +75,7 @@ public:
             texture,
             NULL, //update the whole texture
             &pixels[0], //Vector of data to update, in RGBA8888 format
-            4*screenWidth //Number of pixel info bytes per row
+            4*screen_width //Number of pixel info bytes per row
         ); 
         
         SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -90,8 +90,8 @@ private:
     
     std::vector<unsigned char> pixels;
 	
-    int screenHeight;
-    int screenWidth;
+    int screen_height;
+    int screen_width;
     
 };
 
