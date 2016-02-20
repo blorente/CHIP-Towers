@@ -172,10 +172,15 @@ private:
     
     void setup_instruction_set() {
         
-        instruction_set_base = std::vector<instruction_t>(36, {"unimplemented", [&] (){print_instruction("unimplemented", instruction);}});
-        instruction_set_8x = std::vector<instruction_t>(36, {"unimplemented", [&] (){print_instruction("unimplemented", instruction);}});
-        instruction_set_Fx = std::vector<instruction_t>(0x70, {"unimplemented", [&] (){print_instruction("unimplemented", instruction);}});
-        
+        setup_instruction_set_base();
+        setup_instruction_set_8x();
+        setup_instruction_set_Fx();        
+         
+    }
+    
+    
+    void setup_instruction_set_base() {
+        instruction_set_base = std::vector<instruction_t>(36, {"unimplemented", [&] (){print_instruction("unimplemented", instruction);}});        
         
         instruction_set_base[0] = {"zero", [&] () {
                                         if ((instruction & 0x000F) > 0) {
@@ -243,7 +248,11 @@ private:
         
         instruction_set_base[0xF] = {"", [&] () {print_instruction(instruction_set_Fx[instruction & 0x00FF].dissasembly, instruction); 
                                                                  instruction_set_Fx[instruction & 0x00FF].function();}};
-                                                                                          
+    }
+    
+    void setup_instruction_set_8x () {
+        instruction_set_8x = std::vector<instruction_t>(36, {"unimplemented", [&] (){print_instruction("unimplemented", instruction);}});        
+        
         instruction_set_8x[0x0] = {"0x8xy0: LD Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] = V[(instruction & 0x00F0) >> 4];}};
         instruction_set_8x[0x1] = {"0x8xy1: OR Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] |= V[(instruction & 0x00F0) >> 4];}};
         instruction_set_8x[0x2] = {"0x8xy2: AND Vx, Vy", [&] () {V[(instruction & 0x0F00) >> 8] &= V[(instruction & 0x00F0) >> 4];}};
@@ -267,6 +276,12 @@ private:
                                                                  unsigned char yy = (instruction & 0x00F0) >> 4;            
                                                                  V[0xF] = V[yy] && 0x80;
                                                                  V[xx] = V[yy] << 1;}};
+    }
+    
+    void setup_instruction_set_Fx () {
+        instruction_set_Fx = std::vector<instruction_t>(0x70, {"unimplemented", [&] (){print_instruction("unimplemented", instruction);}});      
+                                                                                       
+        
         instruction_set_Fx[0x07] = {"0xFx07: LD Vx, DT", [&] () {V[(instruction & 0x0F00) >> 8] = timers.d;}};  
         instruction_set_Fx[0x0A] = {"0xFx0A: LD Vx, K", [&] () {if (!keypad->is_any_key_pressed()) {
                                                                    pc -= 2; 
@@ -287,7 +302,7 @@ private:
                                                                     I = I + last + 1;}};    
         instruction_set_Fx[0x65] = {"0xFx65: LD Vx, [I]", [&] () {int last = (instruction & 0x0F00) >> 8;
                                                                     for (int i = 0; i < last + 1; i++) {V[i] = memory[I + i];}
-                                                                    I = I + last + 1;}};            
+                                                                    I = I + last + 1;}};           
     }
     
     void emulate_cycle() {
