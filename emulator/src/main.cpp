@@ -1,11 +1,11 @@
 #include <iostream>
-#include "Emulator.hpp"
+#include "chip8_emulator.h"
 #include "SDL.h"
 
 
 int main(int argc, char *argv[]) {
 	
-    Emulator emulator = Emulator();
+    chip8_emulator emulator;
     emulator.reboot();
     
     if (argc > 1) {

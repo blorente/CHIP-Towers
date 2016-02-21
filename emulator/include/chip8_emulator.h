@@ -1,5 +1,5 @@
-#ifndef EMULATOR_H
-#define EMULATOR_H
+#ifndef CHIP8_EMULATOR_H
+#define CHIP8_EMULATOR_H
 
 #include <iostream>
 #include <iomanip>
@@ -11,36 +11,35 @@
 #include <random>
 #include <SDL.h>
 
-#include "MonochromeScreen.hpp"
-#include "Keypad.hpp"
+#include "monochrome_screen.hpp"
+#include "chip8_keypad.hpp"
 
-class Emulator {
+class chip8_emulator {
 public:
 
-	Emulator() {
-        
+	chip8_emulator () {
         if (SDL_WasInit(0) != SDL_INIT_EVERYTHING) {
             SDL_Init(SDL_INIT_EVERYTHING);
         }
-        	
-        screen = new MonochromeScreen(screen_width, screen_height, "CHIP Towers");  
-        keypad = new Keypad();      
+            
+        screen = new monochrome_screen(screen_width, screen_height, "CHIP Towers");  
+        keypad = new chip8_keypad();      
         
-		memory = std::vector<unsigned char>(4096);
-		V = std::vector<unsigned char>(16);	
-		scrbuf = std::vector<bool>(screen_width * screen_height, {false});	
+        memory = std::vector<unsigned char>(4096);
+        V = std::vector<unsigned char>(16);	
+        scrbuf = std::vector<bool>(screen_width * screen_height, {false});	
         stack.stack = std::vector<unsigned short>(16);
-		stack.sp = 0;
-		timers.d = 0;
-		timers.s = 0;
+        stack.sp = 0;
+        timers.d = 0;
+        timers.s = 0;
         I = 0;
         
         draw_flag = false;
         
         setup_instruction_set();
-	}
+    }
 		
-	~Emulator(){
+	~chip8_emulator(){
         
         delete screen;
         delete keypad;
@@ -194,11 +193,12 @@ private:
                                         }
                                   }
                              };
-        instruction_set_base[0x1] = {"0x1nnn: JP addr", [&] (){print_instruction("0x1nnn: JP addr", instruction); pc = instruction & 0x0FFF;}};
+        instruction_set_base[0x1] = {"0x1nnn: JP addr", [&] (){print_instruction("0x1nnn: JP addr", instruction); 
+                                                               pc = instruction & 0x0FFF;}};
         instruction_set_base[0x2] = {"0x2nnn: CALL addr", [&] (){print_instruction("0x2nnn: CALL addr", instruction); 
-                                                            stack.stack[stack.sp] = pc; 
-                                                            stack.sp++;
-                                                            pc = instruction & 0x0FFF;}};
+                                                                stack.stack[stack.sp] = pc; 
+                                                                stack.sp++;
+                                                                pc = instruction & 0x0FFF;}};
         instruction_set_base[0x3] = {"0x3xkk: SE Vx, kk", [&] () {print_instruction("0x3xkk: SE Vx, kk", instruction); 
                                                              if (V[(instruction & 0x0F00) >> 8] == (unsigned char) instruction & 0x00FF) {pc += 2;}}};
         instruction_set_base[0x4] = {"0x4xkk: SNE Vx, kk", [&] () {print_instruction("0x4xkk: SNE Vx, kk", instruction); 
@@ -413,7 +413,7 @@ protected:
         std::function<void()> function;
     };
 
-public: //private:
+private:
 	
 	unsigned short instruction;
     bool draw_flag;    
@@ -430,8 +430,8 @@ public: //private:
     std::vector<instruction_t> instruction_set_8x;
     std::vector<instruction_t> instruction_set_Fx;
     
-    MonochromeScreen* screen;
-    Keypad* keypad;
+    monochrome_screen* screen;
+    chip8_keypad* keypad;
     
 	
 };

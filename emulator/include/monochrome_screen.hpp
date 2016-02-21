@@ -6,11 +6,11 @@
 #include <iostream>
 #include <vector>
 
-class MonochromeScreen {
+class monochrome_screen {
     
 public:
     
-    MonochromeScreen(int pixels_wide, int pixels_high, const char* window_name) {
+    monochrome_screen(int pixels_wide, int pixels_high, const char* window_name) {
         //Assignments
         screen_height = pixels_high;
         screen_width = pixels_wide;
@@ -44,7 +44,7 @@ public:
         
     }
     
-    ~MonochromeScreen() {
+    ~monochrome_screen() {
        SDL_DestroyWindow(window);
        SDL_DestroyRenderer(renderer);
     }

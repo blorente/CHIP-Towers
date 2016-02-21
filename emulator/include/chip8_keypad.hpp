@@ -6,15 +6,15 @@
 #include <vector>
 #include <iostream>
 
-class Keypad {
+class chip8_keypad {
     
 public:
     
-    Keypad() {
+    chip8_keypad() {
         keys = std::vector<bool>(16, {false});
         last_pressed = 0;
     }
-    ~Keypad(){}
+    ~chip8_keypad(){}
     
     void print() {        
         std::cout << "|";
