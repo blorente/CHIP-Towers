@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CHIPTowers_SOURCE_DIR}/cmake")
 # Set an output directory for our binaries
 set(BIN_DIR ${CHIPTowers_SOURCE_DIR}/bin)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 # Look up SDL2 and add the include directory to our include path
 find_package(SDL2 REQUIRED)

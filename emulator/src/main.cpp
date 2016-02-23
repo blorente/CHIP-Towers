@@ -1,5 +1,5 @@
 #include <iostream>
-#include "chip8_emulator.h"
+#include "chip8_emulator.hpp"
 #include "SDL.h"
 
 

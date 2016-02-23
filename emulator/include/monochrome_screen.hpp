@@ -19,7 +19,7 @@ public:
         pixels = px;
         
         //SDL stuff
-        window = window = SDL_CreateWindow
+        window = SDL_CreateWindow
             (
                 window_name,
                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
