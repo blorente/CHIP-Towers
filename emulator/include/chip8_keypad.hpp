@@ -57,67 +57,67 @@ namespace cpp {
             void process_key_down(const SDL_Event& event) {
                 if (event.type == SDL_KEYDOWN) {
                     switch(event.key.keysym.sym) {
-                        case SDLK_KP_1:
+                        case SDLK_1:
                             keys[0x1] = true;
                             last_pressed = 0x1;
                             break;
-                        case SDLK_KP_2:
+                        case SDLK_2:
                             keys[0x2] = true;
                             last_pressed = 0x2;
                             break;
-                        case SDLK_KP_3:
+                        case SDLK_3:
                             keys[0x3] = true;
                             last_pressed = 0x3;
                             break;
-                        case SDLK_KP_4:
+                        case SDLK_q:
                             keys[0x4] = true;
                             last_pressed = 0x4;
                             break;
-                        case SDLK_KP_5:
+                        case SDLK_w:
                             keys[0x5] = true;
                             last_pressed = 0x5;
                             break;
-                        case SDLK_KP_6:
+                        case SDLK_e:
                             keys[0x6] = true;
                             last_pressed = 0x6;
                             break;
-                        case SDLK_KP_7:
+                        case SDLK_a:
                             keys[0x7] = true;
                             last_pressed = 0x7;
                             break;
-                        case SDLK_KP_8:
+                        case SDLK_s:
                             keys[0x8] = true;
                             last_pressed = 0x8;
                             break;
-                        case SDLK_KP_9:
+                        case SDLK_d:
                             keys[0x9] = true;
                             last_pressed = 0x9;
                             break;
-                        case SDLK_DOWN:
+                        case SDLK_x:
                             keys[0x0] = true;
                             last_pressed = 0x0;
                             break;               
-                        case SDLK_LEFT:
+                        case SDLK_z:
                             keys[0xA] = true;
                             last_pressed = 0xA;
                             break;
-                        case SDLK_RIGHT:
+                        case SDLK_c:
                             keys[0xB] = true;
                             last_pressed = 0xB;
                             break;
-                        case SDLK_KP_MINUS:
+                        case SDLK_4:
                             keys[0xC] = true;
                             last_pressed = 0xC;
                             break;                 
-                        case SDLK_KP_PLUS:
+                        case SDLK_r:
                             keys[0xD] = true;
                             last_pressed = 0xD;
                             break;
-                        case SDLK_KP_ENTER:
+                        case SDLK_f:
                             keys[0xE] = true;
                             last_pressed = 0xE;
                             break;
-                        case SDLK_KP_PERIOD:
+                        case SDLK_v:
                             keys[0xF] = true;
                             last_pressed = 0xF;
                             break;
@@ -130,57 +130,57 @@ namespace cpp {
             void process_key_up(const SDL_Event& event) {
                 if (event.type == SDL_KEYUP) {
                     switch(event.key.keysym.sym) {
-                        case SDLK_KP_1:
+                        case SDLK_1:
                             keys[0x1] = false;
                             break;
-                        case SDLK_KP_2:
+                        case SDLK_2:
                             keys[0x2] = false;
                             break;
-                        case SDLK_KP_3:
+                        case SDLK_3:
                             keys[0x3] = false;
                             break;
-                        case SDLK_KP_4:
+                        case SDLK_q:
                             keys[0x4] = false;
                             break;
-                        case SDLK_KP_5:
+                        case SDLK_w:
                             keys[0x5] = false;
                             break;
-                        case SDLK_KP_6:
+                        case SDLK_e:
                             keys[0x6] = false;
                             break;
-                        case SDLK_KP_7:
+                        case SDLK_a:
                             keys[0x7] = false;
                             break;
-                        case SDLK_KP_8:
+                        case SDLK_s:
                             keys[0x8] = false;
                             break;
-                        case SDLK_KP_9:
-                            keys[0x9] = false;
+                        case SDLK_d:
+                            keys[0x9] = false;;
                             break;
-                        case SDLK_DOWN:
+                        case SDLK_x:
                             keys[0x0] = false;
                             break;               
-                        case SDLK_LEFT:
+                        case SDLK_z:
                             keys[0xA] = false;
                             break;
-                        case SDLK_RIGHT:
+                        case SDLK_c:
                             keys[0xB] = false;
                             break;
-                        case SDLK_KP_MINUS:
+                        case SDLK_4:
                             keys[0xC] = false;
                             break;                 
-                        case SDLK_KP_PLUS:
+                        case SDLK_r:
                             keys[0xD] = false;
                             break;
-                        case SDLK_KP_ENTER:
+                        case SDLK_f:
                             keys[0xE] = false;
                             break;
-                        case SDLK_KP_PERIOD:
+                        case SDLK_v:
                             keys[0xF] = false;
                             break;
                         default:
-                            std::cout << "Unknown Key released!" << std::endl;                                    
-                    }
+                            std::cout << "Unknown Key pressed!" << std::endl;                                    
+                    }  
                 } 
             }
         

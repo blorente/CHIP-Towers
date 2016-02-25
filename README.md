@@ -24,5 +24,11 @@ To run one of the ROMs included in emulator/res/games, copy the ROM to your `bui
   
 ## Controls:
 
-  The CHIP-8 has a 16-key keypad, which in the simulator is linked to the numeric pad in the keyboard, and the Down, Right and Left arrows.
+  The CHIP-8 has a 16-key keypad, which in the simulator is linked to the following keys:
+  
+| 1 | 2 | 3 | 4 |
+|---|---|---|---|
+| Q | W | E | R |
+| A | S | D | F |
+| Z | X | C | V |
   
