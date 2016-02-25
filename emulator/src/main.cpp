@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[]) {
 	
-    chip8_emulator emulator;
+    cpp::emulator::chip8_emulator emulator;
     emulator.reboot();
     
     if (argc > 1) {
